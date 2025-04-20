@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="intro-section">
+    <h1>Weather Wizard</h1>
+    <p>Your personal weather assistant, providing real-time weather information at your fingertips!</p>
+    <div class="scenarios">
+      <div class="scenario">
+        <h3>Planning a Trip?</h3>
+        <p>Check the weather in your destination before packing your bags!</p>
+      </div>
+      <div class="scenario">
+        <h3>Need an Umbrella?</h3>
+        <p>Get up-to-date info on whether you'll need rain protection today.</p>
+      </div>
+      <div class="scenario">
+        <h3>Daily Routine</h3>
+        <p>Plan your day by knowing if it's going to be sunny, cloudy, or rainy.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="weather-container">
+    <div class="search-box">
+      <input type="text" class="search-box-input" placeholder="Enter city" />
+    </div>
+
+    <div class="location">
+      <div class="city"></div>
+      <div class="date"></div>
+    </div>
+
+    <div class="current">
+      <div class="temp"></div>
+      <div class="weather"></div>
+      <div class="hi-low"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
