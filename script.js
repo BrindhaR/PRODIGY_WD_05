@@ -1,110 +1,70 @@
-const board = document.getElementById("board");
-const statusMessage = document.getElementById("statusMessage");
-const restartBtn = document.getElementById("restartBtn");
-const symbolButtons = document.querySelectorAll(".symbol-btn");
-const symbolSelect = document.getElementById("symbolSelect");
-
-let gameMode = ""; // pvp or pvc
-let currentPlayer = "X";
-let playerSymbol = "X";
-let computerSymbol = "O";
-let cells = ["", "", "", "", "", "", "", "", ""];
-let gameActive = true;
-
-document.getElementById("pvpBtn").onclick = () => startGame("pvp");
-document.getElementById("pvcBtn").onclick = () => {
-  gameMode = "pvc";
-  symbolSelect.classList.remove("hidden");
-};
-restartBtn.onclick = () => location.reload();
-
-symbolButtons.forEach((btn) => {
-  btn.onclick = () => {
-    playerSymbol = btn.dataset.symbol;
-    computerSymbol = playerSymbol === "X" ? "O" : "X";
-    startGame("pvc");
+const api = {
+    key: "a8cee1ce13b39fe4bd59cb2d96325b41",
+    base: "https://api.openweathermap.org/data/2.5/"
   };
-});
-
-function startGame(mode) {
-  gameMode = mode;
-  symbolSelect.classList.add("hidden");
-  board.classList.remove("hidden");
-  restartBtn.classList.remove("hidden");
-  statusMessage.textContent = `Player ${currentPlayer}'s turn`;
-  createBoard();
-}
-
-function createBoard() {
-  board.innerHTML = "";
-  cells = ["", "", "", "", "", "", "", "", ""];
-  cells.forEach((_, i) => {
-    const cell = document.createElement("div");
-    cell.classList.add("cell");
-    cell.dataset.index = i;
-    cell.addEventListener("click", () => handleCellClick(i));
-    board.appendChild(cell);
-  });
-}
-
-function handleCellClick(index) {
-  if (!gameActive || cells[index]) return;
-
-  if (gameMode === "pvc" && currentPlayer !== playerSymbol) return;
-
-  cells[index] = currentPlayer;
-  updateBoard();
-  checkResult();
-
-  if (gameMode === "pvc" && gameActive) {
-    currentPlayer = computerSymbol;
-    setTimeout(() => {
-      aiMove();
-      updateBoard();
-      checkResult();
-    }, 500);
-  } else {
-    currentPlayer = currentPlayer === "X" ? "O" : "X";
-    updateStatus();
-  }
-}
-
-function aiMove() {
-  let emptyIndexes = cells.map((v, i) => (v === "" ? i : null)).filter(i => i !== null);
-  let randomIndex = emptyIndexes[Math.floor(Math.random() * emptyIndexes.length)];
-  cells[randomIndex] = computerSymbol;
-  currentPlayer = playerSymbol;
-}
-
-function updateBoard() {
-  const cellElements = document.querySelectorAll(".cell");
-  cellElements.forEach((cell, i) => {
-    cell.textContent = cells[i];
-  });
-}
-
-function updateStatus() {
-  statusMessage.textContent = `Player ${currentPlayer}'s turn`;
-}
-
-function checkResult() {
-  const wins = [
-    [0,1,2],[3,4,5],[6,7,8],
-    [0,3,6],[1,4,7],[2,5,8],
-    [0,4,8],[2,4,6]
-  ];
-
-  for (let combo of wins) {
-    const [a, b, c] = combo;
-    if (cells[a] && cells[a] === cells[b] && cells[a] === cells[c]) {
-      statusMessage.textContent = `Player ${cells[a]} wins! 🎉`;
-      gameActive = false;
-      return;
+  
+  const searchbox = document.querySelector('.search-box-input');
+  searchbox.addEventListener('keypress', setQuery);
+  
+  function setQuery(evt) {
+    if (evt.keyCode == 13) {
+      getResults(searchbox.value);
     }
   }
-
-  if (!cells.includes("")) {
-    statusMessage.textContent = "It's a draw! 🤝";
-    gameActive = false;
+  
+  function getResults(query) {
+    fetch(`${api.base}weather?q=${query}&units=metric&APPID=${api.key}`)
+      .then(weather => weather.json())
+      .then(displayResults);
   }
-}
+  
+  function displayResults(weather) {
+    let city = document.querySelector('.location .city');
+    city.innerText = `${weather.name}, ${weather.sys.country}`;
+  
+    let now = new Date();
+    let date = document.querySelector('.location .date');
+    date.innerText = dateBuilder(now);
+  
+    let temp = document.querySelector('.current .temp');
+    temp.innerHTML = `${Math.round(weather.main.temp)}<span>°C</span>`;
+  
+    let weather_el = document.querySelector('.current .weather');
+    weather_el.innerText = weather.weather[0].main;
+  
+    let hilow = document.querySelector('.hi-low');
+    hilow.innerText = `${Math.round(weather.main.temp_min)}°C / ${Math.round(weather.main.temp_max)}°C`;
+  
+    setBackground(weather.main.temp);
+  }
+  
+  function setBackground(temperature) {
+    let body = document.querySelector('body');
+    let bgImage;
+  
+    if (temperature <= 0) {
+      bgImage = "url('https://cdn.pixabay.com/animation/2022/11/08/06/19/06-19-11-383_512.gif')";
+    } else if (temperature > 0 && temperature <= 15) {
+      bgImage = "url('https://i.pinimg.com/originals/ef/b1/01/efb101b93d77eebfb2293bafd51fd699.gif')";
+    } else if (temperature > 15 && temperature <= 25) {
+      bgImage = "url('https://theyearofhalloween.com/wp-content/uploads/2014/09/fall-leaves-autumn-gif-1.gif')";
+    } else {
+      bgImage = "url('https://i.pinimg.com/originals/5a/40/37/5a4037c5df4438f2e087eadb3eee03f2.gif')";
+    }
+  
+    body.style.transition = "background-image 1s ease-in-out";
+    body.style.backgroundImage = bgImage;
+  }
+  
+  function dateBuilder(d) {
+    let months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  
+    let day = days[d.getDay()];
+    let date = d.getDate();
+    let month = months[d.getMonth()];
+    let year = d.getFullYear();
+  
+    return `${day} ${date} ${month} ${year}`;
+  }
+  
